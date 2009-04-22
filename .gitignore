@@ -1,6 +1,8 @@
 # ignore all pyc files
 *.pyc
+
 #ignore all backup files
 *~
+*#
 #ignore all logs
 *.log
