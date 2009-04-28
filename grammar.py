@@ -1,5 +1,7 @@
 # coding: utf-8
 
+import re
+
 keywords = ['BEGIN', 'END', 'CLASS', 'IS', 'METHOD', 'READ', 'WRITE',
             'IF', 'THEN', 'ELSE', 'WHILE', 'DO', 'MOD', 'NEW', 'SELF',
             'NULL', 'TRUE', 'FALSE']

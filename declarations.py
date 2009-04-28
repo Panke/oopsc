@@ -8,7 +8,8 @@ class Declaration(object):
 
 class ClassDeclaration(Declaration):
    
-    def __init__(self):
+    def __init__(self, ident):
+        Declaration.__init__(self, ident)
         # size of the class header used for organisation of each object
         headersize = 0
 
@@ -21,3 +22,40 @@ class ClassDeclaration(Declaration):
         self.methods = []
         # declarations visible in this class
         self.declarations = []
+
+    def add_member(self, member):
+        """
+        Add a member to the class
+        """
+        if isinstance(member, MethodDeclaration):
+            methods.append(member)
+        else:
+            #member is a list of variable declarations
+            self.vars.extend(member)
+
+class MethodDeclaration(Declaration):
+    """
+    Declaration of a method
+    """
+
+    def __init__(self, ident):
+        Declaration.__init__(self, ident)
+        self.statements = []
+        self.vars = []
+
+
+    def add_statement(self, stmt):
+        self.statements.append(stmt)
+
+    def add_var(self, var):
+        self.vars.append(var)
+
+class VariableDeclaration(Declaration):
+    """
+    Declaration of a variable
+    """
+
+    def __init__(self, ident, type=None):
+        Declaration.__init__(self, ident)
+        self.type = type
+

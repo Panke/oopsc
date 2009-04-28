@@ -6,23 +6,11 @@ It's designed closely after the original OOPS compiler written in Java
 by Thomas Röfer
 """
 
-import re
 
 
-class Stream(unicode):
-    def __init__(self, source, encoding='utf8', errors='strict'):
-        unicode.__init__(self, source, encoding, errors)
-        self.position = (0, 0)
-        self._iter = iter(self)
-
-    def __next__(self):
-        c = self._iter.next()
-        x, y = self.position
-        self.position = (x+1, 0) if c == '\n' else (x, y+1)
-        return c
-    def next(self):
-        return self.__next__()
-
+from utils import Stream
+from grammar import *
+           
 class Token(object):
     """
     Represents a token of OOPS.
@@ -41,9 +29,23 @@ class Token(object):
         self.position = pos
         self.value = value
 
+    def __repr__(self):
+        return self.__str__()
+        
     def __str__(self):
         return "%s: %s at %s" % (self.id, self.value, self.position)
 
+
+    def __eq__(self, rhs):
+        try:
+            return self.id == rhs
+        except TypeError:
+            return self.id == rhs.id
+
+    def __ne__(self, rhs):
+        return not self.__eq__(rhs)
+
+    
 def lex(source):
     """
     Lexical analysis the source and return the found tokens.
@@ -103,26 +105,28 @@ def lex(source):
                     c = char_stream.next()
                 yield Token('NUMBER', char_stream.position, int(word))
 
-            #operators
-
-            elif c in ops:
-                yield Token(ops[c], char_stream.position)
-                c = char_stream.next()
                 
             elif c in long_ops:
                 # only handle the special case that no two long operators
                 # start with the same symbol
                 
                 op = long_ops[c]
-                next_one = char_stream.next()
-                # is next_one equal to the second char of the op?
+                next_one = char_stream.seek()
+                # is next_one equals to the second char of the op?
                 if next_one == op[0]: 
                     yield Token(op[1], char_stream.position)
                     c = char_stream.next()
-                
-                else:
-                    raise UnexpectedSymbol(c, char_stream.position)
+                    #we have to consume the next char, too
+                    c = char_stream.next()
                     
+            #operators
+
+                elif c in ops:
+                    yield Token(ops[c], char_stream.position)
+                    c = char_stream.next()
+            elif c in ops:
+                yield Token(ops[c], char_stream.position)
+                c = char_stream.next()
                 
             else:
                 raise UnexpectedSymbol(c, char_stream.position)
@@ -131,4 +135,8 @@ def lex(source):
 
                 
         
-      
+if __name__ == '__main__':
+    f = open("/home/tobias/uebersetzerbau/OOPSC-0/Examples/code.oops").read()
+    stream = Stream(unicode(f, 'utf8'))
+    for token in lex(stream):
+        print token

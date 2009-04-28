@@ -3,6 +3,6 @@
 
 #ignore all backup files
 *~
-*#
+*py#
 #ignore all logs
 *.log
