@@ -15,7 +15,7 @@ ops = {'.' : 'PERIOD', ';' : 'SEMICOLON', ',' : 'COMMA', ')' : 'RPAREN',
 long_ops = {':' : ('=', 'BECOMES'), '>' : ('=', 'GTEQ'), '<' : ('=', 'LTEQ')}
 
 
-whitespace = re.compile('\s')
+whitespace = re.compile(r'\s')
 letter = re.compile('[a-zA-Z]')
 letter_or_digit = re.compile('[a-zA-Z0-9]')
 digit = re.compile('[0-9]')

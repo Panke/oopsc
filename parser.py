@@ -1,7 +1,7 @@
 # coding: utf-8 
 
 """
-This module implements the parser for OOPS. It's main entry point is
+This module implements the parser for OOPS. Its main entry point is
 the function ''parse'' which takes a stream of tokens and returns
 the abstract syntax tree of the program or raises an InvalidSyntaxError.
 
@@ -12,7 +12,11 @@ and they consume all tokens of the element that they are parsing.
 """
 
 from errors import UnexpectedToken
+import declarations
 from declarations import *
+from expressions import *
+from statements import *
+from lexer import Token
 
 class AST(object):
     """
@@ -28,6 +32,12 @@ class AST(object):
     def context_analysis(self):
         pass
 
+    def __str__(self):
+        return str(self.main_class)
+
+
+
+        
 def parse(stream):
     # Every simple OOPS/0 program starts with the declartion of the
     # main class
@@ -51,12 +61,13 @@ def class_decl(stream):
     stream.keyword('END')
     stream.keyword('CLASS')
 
+    return decl
+    
 def member_decl(stream):
     """
     This class parses the declaration of a class member, which
     can either be a method or a variable
 
-    @param parent: the class the declaration belongs to
     """
 
     # check if we parse a attribute or a method
@@ -88,7 +99,8 @@ def method_decl(stream):
         method.add_statement(statement(stream))
 
     stream.keyword('END')
-
+    stream.keyword('METHOD')
+    
     return method
 
 def var_decl(stream):
@@ -127,7 +139,15 @@ def statement(stream):
     try:
         return statements[t.id](stream)
     except KeyError:
-        return expression(stream)
+        e = member_access(stream)
+        if stream.seek() == 'BECOMES':
+            stream.next()
+            stmt = Assignment(e, expression(stream))
+        else:
+            stmt = CallStatement(e)
+
+        stream.token('SEMICOLON')
+        return stmt
 
 def read_stmt(stream):
     """
@@ -200,10 +220,10 @@ def factor(stream):
         return member_access(stream)
     
 def member_access(stream):
-    e = literal(stream))
+    e = literal(stream)
     while(stream.seek() == 'PERIOD'):
         stream.next()
-        e = AccessExpression(e, var_or_call(stream.identifier()))
+        e = AccessExpression(e, VarOrCallExpression(stream.identifier()))
 
     return e
 
@@ -211,12 +231,12 @@ def literal(stream):
     next = stream.next()
     
     if next == 'NUMBER':
-        return LiteralExpression(next, declarations.buildin.int_type)
+        return LiteralExpression(next, declarations.intType)
     elif next == 'NULL':
-        return LiteralExpression(0, declarations.buildin.nullType)
+        return LiteralExpression(0, declarations.nullType)
                              
     elif next == 'SELF':
-        return VarOrCallExpression('_self')
+        return VarOrCallExpression(Token('IDENT', next.position, '_self'))
     
     elif next == 'NEW':
         return NewExpression(stream.identifier())
@@ -225,8 +245,10 @@ def literal(stream):
         exp = expression(stream)
         stream.token('RPAREN')
         return exp
+    
     elif next == 'IDENT':
-        return VarOrCallExpression(stream.identifier())
+        return VarOrCallExpression(next)
+
     else:
         raise UnexpectedToken(next)
                                  

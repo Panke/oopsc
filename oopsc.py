@@ -4,7 +4,9 @@
 import sys, os, logging
 from optparse import OptionParser
 import lexer
+import parser
 
+from utils import TokenStream
 
 def generate_parser():
     usage = "%prog [options] source [dest]"
@@ -38,6 +40,20 @@ def generate_parser():
     
 
 if __name__ == '__main__':
-    parser = generate_parser()
-    options, args = parser.parse_args()
+    pars = generate_parser()
+    options, args = pars.parse_args()
 
+    #open the file
+    f = open(args[0])
+    char_stream = unicode(f.read(), 'utf8')
+    tokens = list(lexer.lex(char_stream))
+
+    if options.p_lexical:
+        for token in tokens:
+            print token
+
+    ast = parser.parse(TokenStream(tokens))
+
+    if options.p_syntax:
+        print ast
+    

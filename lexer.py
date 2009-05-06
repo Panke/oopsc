@@ -21,7 +21,7 @@ class Token(object):
         """
         The initializer.
         id is a token id, one of the global id field.
-        pos should be a sequenz like (x, y) and value
+        pos should be a sequence like (x, y) and value
         the string representation of the number or identifier
         """
         
